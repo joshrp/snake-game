@@ -1,0 +1,15 @@
+{
+  "name": "snake",
+  "version": "0.0.0",
+  "description": "Small game of snake for fun",
+  "main": "main.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "joshrp/snakeGame"
+  },
+  "author": "Josh Priestley",
+  "license": "BSD"
+}
