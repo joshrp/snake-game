@@ -1,2 +1,4 @@
 *.sublime-*
 spritelib_gpl
+app/js/pixi.js
+node_modules
