@@ -6,6 +6,10 @@ define(['lib/pixi'], function (PIXI) {
 		this.renderable = true;
 		this.sprite = new PIXI.Sprite(myTexture);
 		this.direction = 'right'
+		this.speed = 0;
+		this.acceleration = 0.05;
+		this.maxSpeed = 5;
+		this.initialSpeed = 1;
 	}
 
 	Snake.prototype = Object.create(PIXI.DisplayObject.prototype);
@@ -20,26 +24,28 @@ define(['lib/pixi'], function (PIXI) {
 	}
 
 	Snake.prototype.frameUpdate = function (helpers) {
-		var amount = 3
+		this.speed += this.acceleration;
+
+		var amount = Math.min(this.speed, this.maxSpeed);
 
 		if (helpers.buttons.isPressed('left') && this.direction != 'right') {
 			this.direction = 'left'
-			this.speed = 0;
+			this.speed = this.initialSpeed;
 		}
 
 		if (helpers.buttons.isPressed('right') && this.direction != 'left') {
 			this.direction = 'right'
-			this.speed = 0;
+			this.speed = this.initialSpeed;
 		}
 
 		if (helpers.buttons.isPressed('up') && this.direction != 'down') {
 			this.direction = 'up'
-			this.speed = 0;
+			this.speed = this.initialSpeed;
 		}
 
 		if (helpers.buttons.isPressed('down') && this.direction != 'up') {
 			this.direction = 'down'
-			this.speed = 0;
+			this.speed = this.initialSpeed;
 		}
 
 		var newX = this.sprite.position.x,
@@ -60,15 +66,19 @@ define(['lib/pixi'], function (PIXI) {
 				break;
 		}
 
-
-		collision = helpers.doesCollide(newX, newY, this.sprite.width, this.sprite.height);
-
-		if (collision) {
-			console.log('Collides with: ', collision);
-			this.direction = '';
-			if (collision.type = 'stage') {
-
+		stageSide = helpers.collisionManager.containsInclusive(
+			helpers.stageBoundaries,
+			{
+				x: newX,
+				y: newY,
+				w: this.sprite.width,
+				h: this.sprite.height
 			}
+		);
+
+		if (stageSide) {
+			console.log('Collides with stage ', stageSide);
+			this.direction = '';
 		} else {
 			this.sprite.position.x = newX;
 			this.sprite.position.y = newY;

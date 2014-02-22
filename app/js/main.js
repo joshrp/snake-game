@@ -27,28 +27,6 @@ require([
 		addToStage = function (object) {
 			stage.addChild(object.sprite);
 			stageObjects.push(object)
-		},
-		doesCollide = function (x,y,w,h) {
-			// Check stage bondaries
-			var collision = {};
-
-			stageSide = collisionManager.containsInclusive({
-				x: 0,
-				y: 0,
-				w: stageWidth,
-				h: stageHeight
-			}, {
-				x: x,
-				y: y,
-				w: w,
-				h: h
-			});
-
-			if (stageSide != false) {
-				collision.type = 'stage'
-				collision.side = stageSide;
-				return collision;
-			}
 		}
 
 	loader.onComplete = start;
@@ -75,7 +53,13 @@ require([
 			buttons: buttonHelper,
 			stageObjects: stageObjects,
 			frameCount: frameCount,
-			doesCollide: doesCollide
+			stageBoundaries: {
+				x: 0,
+				y: 0,
+				w: stageWidth,
+				h: stageHeight
+			},
+			collisionManager: collisionManager
 		};
 
 		hitFood = false;
@@ -84,7 +68,6 @@ require([
 			var food = foods[i];
 
 			if (collisionManager.touches(snake.getBounds(), food.getBounds())) {
-				console.log('Hit food', food)
 				hitFood = food;
 				break;
 			}
@@ -99,7 +82,6 @@ require([
 		stageObjects.forEach(function (obj, i) {
 			obj.frameUpdate(objectHelper);
 		});
-
 
 		renderer.render(stage);
 		if (!pauseAnimation)
