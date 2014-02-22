@@ -16,6 +16,18 @@ define(function () {
 				return 'right';
 
 			return false;
+		},
+
+		// Does a touch b at all
+		// {x,y,w,h}, {x,y,w,h}
+		touches: function (a, b) {
+			return !(
+				b.x + b.w < a.x ||
+				b.y + b.h < a.y ||
+				b.x > a.x + a.w ||
+				b.y > a.y + a.h
+			);
+
 		}
 	}
 

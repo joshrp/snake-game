@@ -6,51 +6,69 @@ require.config({
 require([
 	'lib/pixi',
 	'objects/snake',
+	'objects/food',
 	'buttonHelper',
 	'collisionManager'
-], function (PIXI, snake, buttonHelper, collisionManager) {
+], function (PIXI, snake, Food, buttonHelper, collisionManager) {
 	var stageWidth = 800,
 		stageHeight = 600,
-		countStageBoundaries = true,
 		stage = new PIXI.Stage(0x66FF99),
 		canvas = document.getElementById("game-canvas"),
-		renderer = PIXI.autoDetectRenderer(
-			stageWidth,
-			stageHeight,
-			canvas
-		),
+		renderer = PIXI.autoDetectRenderer(stageWidth, stageHeight, canvas),
 		frameCount = 0,
-		stageObjects = [];
+		foods = [],
+		pauseAnimation = false,
+		beginningFood = 4,
+		stageObjects = [],
+		loader = new PIXI.AssetLoader([
+			"/resources/1945.png",
+			"/resources/food_static.png"
+		]),
+		addToStage = function (object) {
+			stage.addChild(object.sprite);
+			stageObjects.push(object)
+		},
+		doesCollide = function (x,y,w,h) {
+			// Check stage bondaries
+			var collision = {};
 
-	stage.addChild(snake.sprite);
-	stageObjects.push(snake);
+			stageSide = collisionManager.containsInclusive({
+				x: 0,
+				y: 0,
+				w: stageWidth,
+				h: stageHeight
+			}, {
+				x: x,
+				y: y,
+				w: w,
+				h: h
+			});
 
-	function doesCollide (x,y,w,h) {
-		// Check stage bondaries
-		var collision = {};
-
-		stageSide = collisionManager.containsInclusive({
-			x: 0,
-			y: 0,
-			w: stageWidth,
-			h: stageHeight
-		}, {
-			x: x,
-			y: y,
-			w: w,
-			h: h
-		});
-
-		if (stageSide != false) {
-			collision.type = 'stage'
-			collision.side = stageSide;
-			return collision;
+			if (stageSide != false) {
+				collision.type = 'stage'
+				collision.side = stageSide;
+				return collision;
+			}
 		}
 
+	loader.onComplete = start;
 
+	loader.load()
+
+	function start() {
+		addToStage(snake);
+
+		for (var i=0; i<beginningFood; i++) {
+			newFood = new Food();
+			newFood.newPosition(stageWidth, stageHeight);
+			addToStage(newFood);
+			foods.push(newFood);
+		}
+
+		animate();
 	}
 
-	function update() {
+	function animate() {
 		frameCount++;
 
 		var objectHelper = {
@@ -60,13 +78,32 @@ require([
 			doesCollide: doesCollide
 		};
 
+		hitFood = false;
+
+		for (i in foods) {
+			var food = foods[i];
+
+			if (collisionManager.touches(snake.getBounds(), food.getBounds())) {
+				console.log('Hit food', food)
+				hitFood = food;
+				break;
+			}
+		}
+
+
+		if (hitFood !== false) {
+			//snake.eatFood(hitFood);
+			hitFood.newPosition(stageWidth, stageHeight);
+		}
+
 		stageObjects.forEach(function (obj, i) {
 			obj.frameUpdate(objectHelper);
 		});
 
-		renderer.render(stage);
 
-		requestAnimFrame(update);
+		renderer.render(stage);
+		if (!pauseAnimation)
+			requestAnimFrame(animate);
 	}
 
 	document.body.onkeydown = function(evt) {
@@ -79,6 +116,10 @@ require([
 		buttonHelper.keyUp(evt);
 	};
 
-	update();
+	document.getElementById('pauseButton').onclick = function () {
+		pauseAnimation = !pauseAnimation;
+		requestAnimFrame(animate);
+	}
+
 	console.log(snake)
 })

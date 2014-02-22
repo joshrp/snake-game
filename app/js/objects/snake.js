@@ -10,8 +10,17 @@ define(['lib/pixi'], function (PIXI) {
 
 	Snake.prototype = Object.create(PIXI.DisplayObject.prototype);
 
+	Snake.prototype.getBounds = function (helpers) {
+		return {
+			x: this.sprite.x,
+			y: this.sprite.y,
+			w: this.sprite.width,
+			h: this.sprite.height
+		}
+	}
+
 	Snake.prototype.frameUpdate = function (helpers) {
-		var amount = 1
+		var amount = 3
 
 		if (helpers.buttons.isPressed('left') && this.direction != 'right') {
 			this.direction = 'left'
@@ -58,7 +67,7 @@ define(['lib/pixi'], function (PIXI) {
 			console.log('Collides with: ', collision);
 			this.direction = '';
 			if (collision.type = 'stage') {
-				console.log('DEATH');
+
 			}
 		} else {
 			this.sprite.position.x = newX;
