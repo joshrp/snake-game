@@ -7,9 +7,10 @@ define(['lib/pixi'], function (PIXI) {
 		this.sprite = new PIXI.Sprite(myTexture);
 		this.direction = 'right'
 		this.speed = 0;
-		this.acceleration = 0.05;
-		this.maxSpeed = 5;
-		this.initialSpeed = 1;
+		this.acceleration = 0.2;
+		this.maxSpeed = 7;
+		this.defaultSpeed = 2;
+		this.friction = 0.4;
 	}
 
 	Snake.prototype = Object.create(PIXI.DisplayObject.prototype);
@@ -24,45 +25,64 @@ define(['lib/pixi'], function (PIXI) {
 	}
 
 	Snake.prototype.frameUpdate = function (helpers) {
-		this.speed += this.acceleration;
 
-		var amount = Math.min(this.speed, this.maxSpeed);
+		this.speed -= this.friction;
 
 		if (helpers.buttons.isPressed('left') && this.direction != 'right') {
+			if (this.direction == 'left') {
+				this.speed += this.acceleration + this.friction;
+			} else {
+				this.speed = this.defaultSpeed;
+			}
 			this.direction = 'left'
-			this.speed = this.initialSpeed;
 		}
 
 		if (helpers.buttons.isPressed('right') && this.direction != 'left') {
+			if (this.direction == 'right') {
+				this.speed += this.acceleration + this.friction;
+			} else {
+				this.speed = this.defaultSpeed;
+			}
 			this.direction = 'right'
-			this.speed = this.initialSpeed;
 		}
 
 		if (helpers.buttons.isPressed('up') && this.direction != 'down') {
+			if (this.direction == 'up') {
+				this.speed += this.acceleration + this.friction;
+			} else {
+				this.speed = this.defaultSpeed;
+			}
 			this.direction = 'up'
-			this.speed = this.initialSpeed;
 		}
 
 		if (helpers.buttons.isPressed('down') && this.direction != 'up') {
+			if (this.direction == 'down') {
+				this.speed += this.acceleration + this.friction;
+			} else {
+				this.speed = this.defaultSpeed;
+			}
 			this.direction = 'down'
-			this.speed = this.initialSpeed;
 		}
+
+
+		this.speed = Math.min(this.speed, this.maxSpeed);
+		this.speed = Math.max(this.speed, this.defaultSpeed);
 
 		var newX = this.sprite.position.x,
 			newY = this.sprite.position.y;
 
 		switch (this.direction) {
 			case 'left':
-				newX = this.sprite.position.x - amount;
+				newX = this.sprite.position.x - this.speed;
 				break;
 			case 'down':
-				newY = this.sprite.position.y + amount;
+				newY = this.sprite.position.y + this.speed;
 				break;
 			case 'right':
-				newX = this.sprite.position.x + amount;
+				newX = this.sprite.position.x + this.speed;
 				break;
 			case 'up':
-				newY = this.sprite.position.y - amount;
+				newY = this.sprite.position.y - this.speed;
 				break;
 		}
 
